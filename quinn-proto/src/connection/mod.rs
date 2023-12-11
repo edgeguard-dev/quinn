@@ -2446,7 +2446,7 @@ impl Connection {
     ) -> Result<(), TransportError> {
         debug_assert_ne!(packet.header.space(), SpaceId::Data);
         let payload_len = packet.payload.len();
-        let mut ack_eliciting = false;
+        let (mut ack_eliciting, mut progressing) = (false, false);
         for result in frame::Iter::new(packet.payload.freeze())? {
             let frame = result?;
             let span = match frame {
@@ -2463,9 +2463,11 @@ impl Connection {
             match frame {
                 Frame::Padding | Frame::Ping => {}
                 Frame::Crypto(frame) => {
+                    progressing = true;
                     self.read_crypto(packet.header.space(), &frame, payload_len)?;
                 }
                 Frame::Ack(ack) => {
+                    progressing = true;
                     self.on_ack_received(now, packet.header.space(), ack)?;
                 }
                 Frame::Close(reason) => {
@@ -2482,7 +2484,13 @@ impl Connection {
             }
         }
 
-        if ack_eliciting {
+        if !progressing {
+            // Initial and Handshake packets must contain a CRYPTO, ACK or CONNECTION_CLOSE frame
+            // to avoid DoS issues. https://www.rfc-editor.org/rfc/rfc9000.html#section-17.2
+            return Err(TransportError::PROTOCOL_VIOLATION(
+                "received initial or handshake packet without CRYPTO/ACK/CONNECTION_CLOSE frame",
+            ));
+        } else if ack_eliciting {
             // In the initial and handshake spaces, ACKs must be sent immediately
             self.spaces[packet.header.space()]
                 .pending_acks
