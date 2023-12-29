@@ -32,10 +32,10 @@ pub trait Session: Send + 'static {
     /// Get data negotiated during the handshake, if available
     ///
     /// Returns `None` until the connection emits `HandshakeDataReady`.
-    fn handshake_data(&self) -> Option<Box<dyn Any>>;
+    fn handshake_data(&self) -> Option<Box<dyn Any + Send>>;
 
     /// Get the peer's identity, if available
-    fn peer_identity(&self) -> Option<Box<dyn Any>>;
+    fn peer_identity(&self) -> Option<Box<dyn Any + Send>>;
 
     /// Get the 0-RTT keys if available (clients only)
     ///

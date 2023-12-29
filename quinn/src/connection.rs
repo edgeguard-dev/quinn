@@ -114,7 +114,7 @@ impl Connecting {
     /// [`Session`](proto::crypto::Session). For the default `rustls` session, the return value can
     /// be [`downcast`](Box::downcast) to a
     /// [`crypto::rustls::HandshakeData`](crate::crypto::rustls::HandshakeData).
-    pub async fn handshake_data(&mut self) -> Result<Box<dyn Any>, ConnectionError> {
+    pub async fn handshake_data(&mut self) -> Result<Box<dyn Any + Send>, ConnectionError> {
         // Taking &mut self allows us to use a single oneshot channel rather than dealing with
         // potentially many tasks waiting on the same event. It's a bit of a hack, but keeps things
         // simple.
@@ -476,7 +476,7 @@ impl Connection {
     /// the returned value.
     ///
     /// [`Connection::handshake_data()`]: crate::Connecting::handshake_data
-    pub fn handshake_data(&self) -> Option<Box<dyn Any>> {
+    pub fn handshake_data(&self) -> Option<Box<dyn Any + Send>> {
         self.0
             .state
             .lock("handshake_data")
@@ -490,7 +490,7 @@ impl Connection {
     /// The dynamic type returned is determined by the configured
     /// [`Session`](proto::crypto::Session). For the default `rustls` session, the return value can
     /// be [`downcast`](Box::downcast) to a <code>Vec<[rustls::Certificate](rustls::Certificate)></code>
-    pub fn peer_identity(&self) -> Option<Box<dyn Any>> {
+    pub fn peer_identity(&self) -> Option<Box<dyn Any + Send>> {
         self.0
             .state
             .lock("peer_identity")

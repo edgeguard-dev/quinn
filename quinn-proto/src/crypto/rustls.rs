@@ -47,7 +47,7 @@ impl crypto::Session for TlsSession {
         initial_keys(self.version, dst_cid, side)
     }
 
-    fn handshake_data(&self) -> Option<Box<dyn Any>> {
+    fn handshake_data(&self) -> Option<Box<dyn Any + Send>> {
         if !self.got_handshake_data {
             return None;
         }
@@ -60,10 +60,10 @@ impl crypto::Session for TlsSession {
         }))
     }
 
-    fn peer_identity(&self) -> Option<Box<dyn Any>> {
+    fn peer_identity(&self) -> Option<Box<dyn Any + Send>> {
         self.inner
             .peer_certificates()
-            .map(|v| -> Box<dyn Any> { Box::new(v.to_vec()) })
+            .map(|v| -> Box<dyn Any + Send> { Box::new(v.to_vec()) })
     }
 
     fn early_crypto(&self) -> Option<(Box<dyn HeaderKey>, Box<dyn crypto::PacketKey>)> {
