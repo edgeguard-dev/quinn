@@ -47,7 +47,7 @@ impl crypto::Session for TlsSession {
         initial_keys(self.version, dst_cid, side)
     }
 
-    fn handshake_data(&self) -> Option<Box<dyn Any>> {
+    fn handshake_data(&self) -> Option<Box<dyn Any + Send>> {
         if !self.got_handshake_data {
             return None;
         }

@@ -64,7 +64,7 @@ impl crypto::Session for NoProtectionSession {
         self.inner.initial_keys(dst_cid, side)
     }
 
-    fn handshake_data(&self) -> Option<Box<dyn std::any::Any>> {
+    fn handshake_data(&self) -> Option<Box<dyn std::any::Any + Send>> {
         self.inner.handshake_data()
     }
 
