@@ -567,16 +567,18 @@ impl Connection {
                 // for starting another datagram. If there is any anti-amplification
                 // budget left, we always allow a full MTU to be sent
                 // (see https://github.com/quinn-rs/quinn/issues/1082)
-                if self.path.anti_amplification_blocked(
-                    self.path.current_mtu() as u64 * num_datagrams as u64 + 1,
-                ) {
+                if false
+                    && self.path.anti_amplification_blocked(
+                        self.path.current_mtu() as u64 * num_datagrams as u64 + 1,
+                    )
+                {
                     trace!("blocked by anti-amplification");
                     break;
                 }
 
                 // Congestion control and pacing checks
                 // Tail loss probes must not be blocked by congestion, or a deadlock could arise
-                if ack_eliciting && self.spaces[space_id].loss_probes == 0 {
+                if false && ack_eliciting && self.spaces[space_id].loss_probes == 0 {
                     // Assume the current packet will get padded to fill the full MTU
                     let untracked_bytes = if let Some(builder) = &builder {
                         buf_capacity - builder.partial_encode.start

@@ -53,6 +53,7 @@ impl Pacer {
         window: u64,
         now: Instant,
     ) -> Option<Instant> {
+        return None;
         debug_assert_ne!(
             window, 0,
             "zero-sized congestion control window is nonsense"
